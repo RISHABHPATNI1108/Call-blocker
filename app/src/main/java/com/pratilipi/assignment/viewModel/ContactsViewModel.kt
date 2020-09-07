@@ -1,96 +1,78 @@
-package com.pratilipi.assignment.viewModel;
+package com.pratilipi.assignment.viewModel
 
-import android.app.Application;
-import android.util.Log;
+import android.app.Application
+import android.util.Log
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import com.pratilipi.assignment.R
+import com.pratilipi.assignment.models.BlockedCalls
+import com.pratilipi.assignment.models.BlockedNumber
+import com.pratilipi.assignment.models.ContactsModel
+import com.pratilipi.assignment.repo.BlockedContactsAndCallsRepo
+import com.pratilipi.assignment.repo.BlockedContactsAndCallsRepo.InsertAndDeleteListener
+import com.pratilipi.assignment.repo.ContactsRepo
+import io.reactivex.Flowable
+import java.util.*
 
-import androidx.annotation.NonNull;
-import androidx.lifecycle.AndroidViewModel;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
+class ContactsViewModel(application: Application) : AndroidViewModel(application), InsertAndDeleteListener {
 
-import com.pratilipi.assignment.models.ContactsModel;
-import com.pratilipi.assignment.R;
-import com.pratilipi.assignment.repo.BlockedContactsAndCallsRepo;
-import com.pratilipi.assignment.repo.ContactsRepo;
-import com.pratilipi.assignment.models.BlockedCalls;
-import com.pratilipi.assignment.models.BlockedNumber;
+    private val contactsRepo: ContactsRepo = ContactsRepo(application)
+    private val repo: BlockedContactsAndCallsRepo = BlockedContactsAndCallsRepo(application, this)
 
-import java.util.ArrayList;
-import java.util.List;
+    var phoneNumber = MutableLiveData<String>()
 
-import io.reactivex.Flowable;
+    private var messageErrorData = MutableLiveData<String?>()
 
-public class ContactsViewModel extends AndroidViewModel implements BlockedContactsAndCallsRepo.InsertAndDeleteListener {
+    val contactsData = MutableLiveData<ArrayList<ContactsModel?>?>()
+    val contacts: Unit
+        get() {
+            contactsData.postValue(contactsRepo.contactList)
+        }
 
-  private static final String TAG = ContactsViewModel.class.getName();
-  private ContactsRepo contactsRepo;
-  private BlockedContactsAndCallsRepo repo;
-  public MutableLiveData<String> phoneNumber = new MutableLiveData<>();
-  public MutableLiveData<String> messageErrorData = new MutableLiveData<>();
-  private MutableLiveData<ArrayList<ContactsModel>> contactsData = new MutableLiveData<>();
-
-  public ContactsViewModel(@NonNull Application application) {
-    super(application);
-    repo = new BlockedContactsAndCallsRepo(application , this);
-    contactsRepo = new ContactsRepo(application);
-  }
-
-  public void getContacts() {
-    contactsData.postValue(contactsRepo.getContactList());
-  }
-
-  public void blockNumber() {
-    String phoneNumber = this.phoneNumber.getValue();
-    Log.d(TAG , "");
-    if (contactsRepo.isValidPhoneNumber(phoneNumber)) {
-      repo.insertBlockNumber(phoneNumber);
-    } else {
-      messageErrorData.postValue(getApplication().getString(R.string.invalid_phone_number));
+    fun blockNumber() {
+        val phoneNumber = phoneNumber.value
+        Log.d(TAG, "")
+        if (contactsRepo.isValidPhoneNumber(phoneNumber!!)) {
+            repo.insertBlockNumber(phoneNumber)
+        } else {
+            messageErrorData.postValue(getApplication<Application>().getString(R.string.invalid_phone_number))
+        }
     }
-  }
 
-  public Flowable<List<BlockedNumber>> getBlockedNumbers() {
-    return repo.getAllBlockedContacts();
-  }
+    val blockedNumbers: Flowable<List<BlockedNumber?>?>?
+        get() = repo.allBlockedContacts
+    val blockedCall: Flowable<List<BlockedCalls?>?>?
+        get() = repo.allBlockedCalls
 
-  public Flowable<List<BlockedCalls>> getBlockedCall() {
-    return repo.getAllBlockedCalls();
-  }
-
-  public void blockContact(ContactsModel contactsModel) {
-    Log.d(TAG, "blockContact" + contactsModel.getPhoneNumber().size());
-    if (contactsModel.getPhoneNumber().size() != 0) {
-      repo.insertBlockNumber(contactsModel);
-    } else {
-      messageErrorData.postValue(getApplication().getString(R.string.no_phone_in_contact));
+    fun blockContact(contactsModel: ContactsModel) {
+        Log.d(TAG, "blockContact" + contactsModel.phoneNumber?.size)
+        if (contactsModel.phoneNumber?.size != 0) {
+            repo.insertBlockNumber(contactsModel)
+        } else {
+            messageErrorData.postValue(getApplication<Application>().getString(R.string.no_phone_in_contact))
+        }
     }
-  }
 
-  public void unBlockContact(BlockedNumber blockedNumber) {
-    repo.deleteBlockNumber(blockedNumber);
-  }
+    fun unBlockContact(blockedNumber: BlockedNumber?) {
+        repo.deleteBlockNumber(blockedNumber)
+    }
 
-  public LiveData<String> getMessageErrorData() {
-    return messageErrorData;
-  }
+    fun getMessageErrorData(): LiveData<String?> {
+        return messageErrorData
+    }
 
-  public LiveData<ArrayList<ContactsModel>> getContactsData() {
-    return contactsData;
-  }
+    override fun onInsertedSuccessfully() {
+        messageErrorData.postValue(getApplication<Application>().getString(R.string.insert_successfully))
+    }
 
+    override fun onDeletedSuccessfully() {}
+    override fun onErrorInInsertOrDelete(error: String?) {
+        messageErrorData.postValue(error)
+    }
 
-  @Override
-  public void onInsertedSuccessfully() {
-    messageErrorData.postValue(getApplication().getString(R.string.insert_successfully));
-  }
+    companion object {
+        private val TAG = ContactsViewModel::class.java.name
+    }
 
-  @Override
-  public void onDeletedSuccessfully() {
-
-  }
-
-  @Override
-  public void onErrorInInsertOrDelete(String error) {
-    messageErrorData.postValue(error);
-  }
 }

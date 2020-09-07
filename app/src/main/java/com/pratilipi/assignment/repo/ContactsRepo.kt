@@ -1,86 +1,72 @@
-package com.pratilipi.assignment.repo;
+package com.pratilipi.assignment.repo
 
-import android.content.ContentResolver;
-import android.content.Context;
-import android.database.Cursor;
-import android.provider.ContactsContract;
-import android.text.TextUtils;
-import android.util.Patterns;
+import android.content.Context
+import android.provider.ContactsContract
+import android.text.TextUtils
+import android.util.Patterns
+import com.pratilipi.assignment.models.ContactsModel
+import java.util.*
 
-import com.pratilipi.assignment.models.ContactsModel;
+class ContactsRepo(  // Check if cursor has some values and parse from the cursor till it has next value
+        private val context: Context) {
+    /**
+     * Method to get List Of Contacts from Contacts content provider.
+     *
+     * @return Array list of contacts, size can be 0 or more.
+     */
+    val contactList: ArrayList<ContactsModel?>?
+        get() {
+            val contacts = ArrayList<ContactsModel?>()
+            val cr = context.contentResolver
+            val cur = cr.query(ContactsContract.Contacts.CONTENT_URI,
+                    null, null, null, null)
 
-import java.util.ArrayList;
-
-public class ContactsRepo {
-
-  private Context context;
-
-  public ContactsRepo(Context context) {
-    this.context = context;
-  }
-
-  /**
-   * Method to get List Of Contacts from Contacts content provider.
-   *
-   * @return Array list of contacts, size can be 0 or more.
-   **/
-  public ArrayList<ContactsModel> getContactList() {
-    ArrayList<ContactsModel> contacts = new ArrayList<>();
-    ContentResolver cr = context.getContentResolver();
-    Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI,
-        null, null, null, null);
-
-    // Check if cursor has some values and parse from the cursor till it has next value
-    if ((cur != null ? cur.getCount() : 0) > 0) {
-      while (cur.moveToNext()) {
-        ContactsModel contact = new ContactsModel();
-        String id = cur.getString(
-            cur.getColumnIndex(ContactsContract.Contacts._ID));
-        String name = cur.getString(cur.getColumnIndex(
-            ContactsContract.Contacts.DISPLAY_NAME));
-        String photoUri = cur.getString(cur.getColumnIndex(
-            ContactsContract.Contacts.PHOTO_THUMBNAIL_URI));
-
-        contact.setDisplayName(name);
-        contact.setPhotoUri(photoUri);
-        if (cur.getInt(cur.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER)) > 0) {
-          Cursor pCur = cr.query(
-              ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-              null,
-              ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
-              new String[]{id}, null);
-          if (pCur != null) {
-            ArrayList<String> phoneNumber = new ArrayList<>();
-            while (pCur.moveToNext()) {
-              String phoneNo = pCur.getString(pCur.getColumnIndex(
-                  ContactsContract.CommonDataKinds.Phone.NUMBER));
-              if (!phoneNumber.contains(phoneNo)) {
-                phoneNumber.add(phoneNo);
-              }
+            // Check if cursor has some values and parse from the cursor till it has next value
+            if (cur?.count ?: 0 > 0) {
+                while (cur!!.moveToNext()) {
+                    val contact = ContactsModel()
+                    val id = cur.getString(
+                            cur.getColumnIndex(ContactsContract.Contacts._ID))
+                    val name = cur.getString(cur.getColumnIndex(
+                            ContactsContract.Contacts.DISPLAY_NAME))
+                    val photoUri = cur.getString(cur.getColumnIndex(
+                            ContactsContract.Contacts.PHOTO_THUMBNAIL_URI))
+                    contact.displayName = name
+                    contact.photoUri = photoUri
+                    if (cur.getInt(cur.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER)) > 0) {
+                        val pCur = cr.query(
+                                ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                                null,
+                                ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?", arrayOf(id), null)
+                        if (pCur != null) {
+                            val phoneNumber = ArrayList<String>()
+                            while (pCur.moveToNext()) {
+                                val phoneNo = pCur.getString(pCur.getColumnIndex(
+                                        ContactsContract.CommonDataKinds.Phone.NUMBER))
+                                if (!phoneNumber.contains(phoneNo)) {
+                                    phoneNumber.add(phoneNo)
+                                }
+                            }
+                            contact.phoneNumber = phoneNumber
+                            contacts.add(contact)
+                            pCur.close()
+                        }
+                    }
+                }
             }
-            contact.setPhoneNumber(phoneNumber);
-            contacts.add(contact);
-            pCur.close();
-          }
+            cur?.close()
+            return contacts
         }
-      }
-    }
-    if (cur != null) {
-      cur.close();
-    }
-    return contacts;
-  }
 
-  /**
-   * Check if phone number is valid, if empty
-   *
-   * @return Boolean true iv phone number is valid,
-   * if phone is empty or is not a phone number returns false.
-   **/
-  public boolean isValidPhoneNumber(String phoneNumber) {
-    if (TextUtils.isEmpty(phoneNumber)) {
-      return false;
-    } else return Patterns.PHONE.matcher(phoneNumber).matches();
-  }
-
+    /**
+     * Check if phone number is valid, if empty
+     *
+     * @return Boolean true iv phone number is valid,
+     * if phone is empty or is not a phone number returns false.
+     */
+    fun isValidPhoneNumber(phoneNumber: CharSequence): Boolean {
+        return if (TextUtils.isEmpty(phoneNumber)) {
+            false
+        } else Patterns.PHONE.matcher(phoneNumber).matches()
+    }
 }

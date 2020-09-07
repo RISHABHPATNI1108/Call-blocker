@@ -1,121 +1,95 @@
-package com.pratilipi.assignment.views.adapters;
+package com.pratilipi.assignment.views.adapters
 
-import android.content.Context;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.ViewGroup;
-import android.widget.Filter;
-import android.widget.Filterable;
+import android.content.Context
+import android.util.Log
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import android.widget.Filter
+import android.widget.Filterable
+import androidx.databinding.DataBindingUtil
+import androidx.recyclerview.widget.RecyclerView
+import com.pratilipi.assignment.R
+import com.pratilipi.assignment.databinding.RowContactBinding
+import com.pratilipi.assignment.models.ContactsModel
+import com.pratilipi.assignment.views.adapters.ContactsAdapter.ContactsViewHolder
+import java.util.*
 
-import androidx.annotation.NonNull;
-import androidx.databinding.DataBindingUtil;
-import androidx.recyclerview.widget.RecyclerView;
+@Suppress("UNCHECKED_CAST")
+class ContactsAdapter(private val listener: OnBlockContactListener) : RecyclerView.Adapter<ContactsViewHolder>(), Filterable {
 
-import com.pratilipi.assignment.R;
-import com.pratilipi.assignment.databinding.RowContactBinding;
-import com.pratilipi.assignment.models.ContactsModel;
+    private val contactsList = ArrayList<ContactsModel?>()
+    private val completeContactsList = ArrayList<ContactsModel?>()
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+    companion object {
+        private val TAG = ContactsAdapter::class.java.name
+    }
 
-@SuppressWarnings("unchecked")
-public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ContactsViewHolder> implements Filterable {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ContactsViewHolder {
+        val inflater = (parent.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater)
+        val binding: RowContactBinding = DataBindingUtil.inflate(inflater, R.layout.row_contact, parent, false)
+        return ContactsViewHolder(binding)
+    }
 
-  private static final String TAG = ContactsAdapter.class.getName();
-  private ArrayList<ContactsModel> contactsList = new ArrayList<>();
-  private ArrayList<ContactsModel> completeContactsList = new ArrayList<>();
-  private OnBlockContactListener listener;
+    override fun onBindViewHolder(holder: ContactsViewHolder, position: Int) {
+        holder.bind(contactsList[position], position)
+    }
 
-  public ContactsAdapter(OnBlockContactListener listener) {
-    this.listener = listener;
-  }
+    override fun getItemCount(): Int {
+        return contactsList.size
+    }
 
-  @NonNull
-  @Override
-  public ContactsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-    LayoutInflater inflater = (LayoutInflater) parent.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-    assert inflater != null;
-    RowContactBinding binding = DataBindingUtil.inflate(inflater, R.layout.row_contact, parent, false);
-    return new ContactsViewHolder(binding);
-  }
-
-  @Override
-  public void onBindViewHolder(@NonNull ContactsViewHolder holder, int position) {
-    holder.bind(contactsList.get(position), position);
-  }
-
-  @Override
-  public int getItemCount() {
-    return contactsList.size();
-  }
-
-  @Override
-  public Filter getFilter() {
-    return new Filter() {
-      @Override
-      protected FilterResults performFiltering(CharSequence constraint) {
-        Log.d(TAG, " constraint " + constraint);
-        List<ContactsModel> filteredList = new ArrayList<>();
-        if (constraint == null || constraint.length() == 0) {
-          filteredList.addAll(completeContactsList);
-        } else {
-          for (ContactsModel contactsModel : completeContactsList) {
-            Log.d(TAG, " constraint " + contactsModel.getPhoneNumber());
-            for (String phoneNumber : contactsModel.getPhoneNumber()) {
-              if (phoneNumber.contains(constraint)) {
-                filteredList.add(contactsModel);
-              }
+    override fun getFilter(): Filter {
+        return object : Filter() {
+            override fun performFiltering(constraint: CharSequence): FilterResults {
+                Log.d(TAG, " constraint $constraint")
+                val filteredList: MutableList<ContactsModel?> = ArrayList()
+                if (constraint.isEmpty()) {
+                    filteredList.addAll(completeContactsList)
+                } else {
+                    for (contactsModel in completeContactsList) {
+                        Log.d(TAG, " constraint " + contactsModel?.phoneNumber)
+                        for (phoneNumber in contactsModel?.phoneNumber!!) {
+                            if (phoneNumber.contains(constraint)) {
+                                filteredList.add(contactsModel)
+                            }
+                        }
+                    }
+                }
+                val filterResults = FilterResults()
+                filterResults.values = filteredList
+                return filterResults
             }
-          }
+
+            override fun publishResults(constraint: CharSequence, results: FilterResults) {
+                contactsList.clear()
+                Log.d(TAG, " publish result " + results.values)
+                contactsList.addAll((results.values as Collection<ContactsModel?>))
+                notifyDataSetChanged()
+            }
         }
-        FilterResults filterResults = new FilterResults();
-        filterResults.values = filteredList;
-        return filterResults;
-      }
-
-      @Override
-      protected void publishResults(CharSequence constraint, FilterResults results) {
-        contactsList.clear();
-        Log.d(TAG, " publish result " + results.values);
-        contactsList.addAll((Collection<? extends ContactsModel>) results.values);
-        notifyDataSetChanged();
-      }
-    };
-  }
-
-  public void addAll(ArrayList<ContactsModel> contacts) {
-    for (ContactsModel contactsModel : contacts) {
-      add(contactsModel);
-    }
-  }
-
-  private void add(ContactsModel contactsModel) {
-    completeContactsList.add(contactsModel);
-    contactsList.add(contactsModel);
-    notifyItemInserted(contactsList.size() - 1);
-  }
-
-  public class ContactsViewHolder extends RecyclerView.ViewHolder {
-
-    RowContactBinding binding;
-
-    public ContactsViewHolder(@NonNull RowContactBinding binding) {
-      super(binding.getRoot());
-      this.binding = binding;
     }
 
-    public void bind(ContactsModel model, int position) {
-      binding.setContact(model);
-      binding.ivBlock.setOnClickListener(v -> listener.onContactBlockClicked(contactsList.get(position)));
+    fun addAll(contacts: ArrayList<ContactsModel?>) {
+        for (contactsModel in contacts) {
+            add(contactsModel)
+        }
     }
 
-  }
+    private fun add(contactsModel: ContactsModel?) {
+        completeContactsList.add(contactsModel)
+        contactsList.add(contactsModel)
+        notifyItemInserted(contactsList.size - 1)
+    }
 
-  public interface OnBlockContactListener {
+    inner class ContactsViewHolder(var binding: RowContactBinding) : RecyclerView.ViewHolder(binding.root) {
+        fun bind(model: ContactsModel?, position: Int) {
+            binding.contact = model
+            binding.ivBlock.setOnClickListener { listener.onContactBlockClicked(contactsList[position]) }
+        }
+    }
 
-    void onContactBlockClicked(ContactsModel contactsModel);
-
-  }
+    interface OnBlockContactListener {
+        fun onContactBlockClicked(contactsModel: ContactsModel?)
+    }
 
 }

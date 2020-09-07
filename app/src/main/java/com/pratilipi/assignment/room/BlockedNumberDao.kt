@@ -1,32 +1,22 @@
-package com.pratilipi.assignment.room;
+package com.pratilipi.assignment.room
 
-import androidx.room.Dao;
-import androidx.room.Delete;
-import androidx.room.Insert;
-import androidx.room.OnConflictStrategy;
-import androidx.room.Query;
-
-import com.pratilipi.assignment.models.BlockedNumber;
-
-import java.util.List;
-
-import io.reactivex.Completable;
-import io.reactivex.Flowable;
-import io.reactivex.Maybe;
+import androidx.room.*
+import com.pratilipi.assignment.models.BlockedNumber
+import io.reactivex.Completable
+import io.reactivex.Flowable
+import io.reactivex.Maybe
 
 @Dao
-public interface BlockedNumberDao {
+interface BlockedNumberDao {
+    @get:Query("SELECT * FROM blockednumbers")
+    val all: Flowable<List<BlockedNumber?>?>?
 
-  @Query("SELECT * FROM blockednumbers")
-  Flowable<List<BlockedNumber>> getAll();
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insert(number: BlockedNumber?): Completable
 
-  @Insert(onConflict = OnConflictStrategy.REPLACE)
-  Completable insert(BlockedNumber number);
+    @Delete
+    fun delete(number: BlockedNumber?): Completable
 
-  @Delete
-  Completable delete(BlockedNumber number);
-
-  @Query("SELECT * FROM blockednumbers WHERE phone_number LIKE :phoneNumber")
-  Maybe<BlockedNumber> getBlockNumberFromNumber(String phoneNumber);
-
+    @Query("SELECT * FROM blockednumbers WHERE phone_number LIKE :phoneNumber")
+    fun getBlockNumberFromNumber(phoneNumber: String?): Maybe<BlockedNumber?>
 }

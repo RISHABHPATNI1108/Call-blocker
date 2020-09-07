@@ -1,28 +1,18 @@
-package com.pratilipi.assignment.room;
+package com.pratilipi.assignment.room
 
-import androidx.room.Dao;
-import androidx.room.Delete;
-import androidx.room.Insert;
-import androidx.room.OnConflictStrategy;
-import androidx.room.Query;
-
-import com.pratilipi.assignment.models.BlockedCalls;
-
-import java.util.List;
-
-import io.reactivex.Completable;
-import io.reactivex.Flowable;
+import androidx.room.*
+import com.pratilipi.assignment.models.BlockedCalls
+import io.reactivex.Completable
+import io.reactivex.Flowable
 
 @Dao
-public interface BlockedCallsDao {
+interface BlockedCallsDao {
+    @get:Query("SELECT * FROM blocked_calls ORDER BY time_stamp DESC")
+    val all: Flowable<List<BlockedCalls?>?>?
 
-  @Query("SELECT * FROM blocked_calls ORDER BY time_stamp DESC")
-  Flowable<List<BlockedCalls>> getAll();
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insert(number: BlockedCalls?): Completable
 
-  @Insert(onConflict = OnConflictStrategy.REPLACE)
-  Completable insert(BlockedCalls number);
-
-  @Delete
-  Completable delete(BlockedCalls number);
-
+    @Delete
+    fun delete(number: BlockedCalls?): Completable?
 }

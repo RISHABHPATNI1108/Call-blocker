@@ -1,65 +1,37 @@
-package com.pratilipi.assignment.models;
+package com.pratilipi.assignment.models
 
-import androidx.annotation.NonNull;
-import androidx.room.ColumnInfo;
-import androidx.room.Entity;
-import androidx.room.PrimaryKey;
-
-import java.util.Objects;
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import java.util.*
 
 @Entity(tableName = "blockednumbers")
-public class BlockedNumber {
+class BlockedNumber(phoneNumber: String, name: String?) {
+    @ColumnInfo(name = "phone_number")
+    @PrimaryKey
+    var phoneNumber = ""
 
-  @ColumnInfo(name = "phone_number")
-  @PrimaryKey
-  @NonNull
-  private String phoneNumber = "";
+    @ColumnInfo(name = "Name")
+    var name: String?
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is BlockedNumber) return false
+        return phoneNumber == other.phoneNumber
+    }
 
-  @ColumnInfo(name = "Name")
-  private String name;
+    override fun hashCode(): Int {
+        return Objects.hash(phoneNumber)
+    }
 
-  @NonNull
-  public String getPhoneNumber() {
-    return phoneNumber;
-  }
+    override fun toString(): String {
+        return "BlockedNumber{" +
+                "phoneNumber='" + phoneNumber + '\'' +
+                ", name='" + name + '\'' +
+                '}'
+    }
 
-  public void setPhoneNumber(@NonNull String phoneNumber) {
-    this.phoneNumber = phoneNumber;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public BlockedNumber(@NonNull String phoneNumber, String name) {
-    this.phoneNumber = phoneNumber;
-    this.name = name;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof BlockedNumber)) return false;
-    BlockedNumber that = (BlockedNumber) o;
-    return phoneNumber.equals(that.phoneNumber);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(phoneNumber);
-  }
-
-  @NonNull
-  @Override
-  public String toString() {
-    return "BlockedNumber{" +
-        "phoneNumber='" + phoneNumber + '\'' +
-        ", name='" + name + '\'' +
-        '}';
-  }
-
+    init {
+        this.phoneNumber = phoneNumber
+        this.name = name
+    }
 }

@@ -1,5 +1,5 @@
-package com.pratilipi.assignment.utils;
+package com.pratilipi.assignment.utils
 
-public final class Constants {
-    public static final int PIE_API_VERSION = 28;
+object Constants {
+    const val PIE_API_VERSION = 28
 }

@@ -1,81 +1,75 @@
-package com.pratilipi.assignment.views.activities;
+package com.pratilipi.assignment.views.activities
 
-import android.os.Bundle;
-import android.util.Log;
-import android.view.MenuItem;
-import android.view.View;
+import android.os.Bundle
+import android.util.Log
+import android.view.MenuItem
+import android.view.View
+import androidx.appcompat.app.AppCompatActivity
+import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.pratilipi.assignment.R
+import com.pratilipi.assignment.databinding.ActivityBlockedCallsAtivityBinding
+import com.pratilipi.assignment.models.BlockedCalls
+import com.pratilipi.assignment.viewModel.ContactsViewModel
+import com.pratilipi.assignment.views.adapters.BlockedCallAdapter
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
+import io.reactivex.subscribers.DisposableSubscriber
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.databinding.DataBindingUtil;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
+class BlockedCallsActivity : AppCompatActivity() {
 
-import com.pratilipi.assignment.R;
-import com.pratilipi.assignment.databinding.ActivityBlockedCallsAtivityBinding;
-import com.pratilipi.assignment.models.BlockedCalls;
-import com.pratilipi.assignment.viewModel.ContactsViewModel;
-import com.pratilipi.assignment.views.adapters.BlockedCallAdapter;
+    private var adapter: BlockedCallAdapter? = null
+    private var binding: ActivityBlockedCallsAtivityBinding? = null
 
-import java.util.List;
-
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
-import io.reactivex.subscribers.DisposableSubscriber;
-
-public class BlockedCallsActivity extends AppCompatActivity {
-
-  private static final String TAG = BlockedCallsActivity.class.getName();
-  private BlockedCallAdapter adapter;
-  private ActivityBlockedCallsAtivityBinding binding;
-
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    binding = DataBindingUtil.setContentView(this, R.layout.activity_blocked_calls_ativity);
-    ContactsViewModel viewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication()).create(ContactsViewModel.class);
-    adapter = new BlockedCallAdapter();
-
-    binding.rvContacts.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
-    binding.rvContacts.setAdapter(adapter);
-    binding.rvContacts.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
-
-    if (getSupportActionBar() != null) {
-      getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    companion object {
+        private val TAG = BlockedCallsActivity::class.java.name
     }
 
-    Log.d(TAG, " in Block Call Activity" + viewModel);
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
-    viewModel.getBlockedCall().observeOn(Schedulers.io()).subscribeOn(AndroidSchedulers.mainThread()).subscribe(new DisposableSubscriber<List<BlockedCalls>>() {
-      @Override
-      public void onNext(List<BlockedCalls> blockedNumbers) {
-        Log.d(TAG, "blockNumberListReceived " + blockedNumbers);
-        runOnUiThread(() -> {
-          adapter.addAll(blockedNumbers);
-          binding.progressBar.setVisibility(View.GONE);
-        });
-      }
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_blocked_calls_ativity)
 
-      @Override
-      public void onError(Throwable t) {
-        Log.d(TAG, "blockNumberListReceived " + t.getMessage());
-        binding.progressBar.setVisibility(View.GONE);
-      }
+        val viewModel = ViewModelProvider.AndroidViewModelFactory(application).create(ContactsViewModel::class.java)
 
-      @Override
-      public void onComplete() {
-        Log.d(TAG, "on Complete ");
-        binding.progressBar.setVisibility(View.GONE);
-      }
-    });
-  }
+        adapter = BlockedCallAdapter()
+        binding?.rvContacts?.layoutManager = LinearLayoutManager(applicationContext)
+        binding?.rvContacts?.adapter = adapter
+        binding?.rvContacts?.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
 
-  @Override
-  public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-    if (item.getItemId() == android.R.id.home) {
-      finish();
+        if (supportActionBar != null) {
+            supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        }
+
+        Log.d(TAG, " in Block Call Activity$viewModel")
+        viewModel.blockedCall?.observeOn(Schedulers.io())?.subscribeOn(AndroidSchedulers.mainThread())?.subscribe(object : DisposableSubscriber<List<BlockedCalls?>?>() {
+            override fun onNext(blockedNumbers: List<BlockedCalls?>?) {
+                Log.d(TAG, "blockNumberListReceived $blockedNumbers")
+                runOnUiThread {
+                    adapter!!.addAll(blockedNumbers)
+                    binding?.progressBar?.visibility = View.GONE
+                }
+            }
+
+            override fun onError(t: Throwable) {
+                Log.d(TAG, "blockNumberListReceived " + t.message)
+                binding?.progressBar?.visibility = View.GONE
+            }
+
+            override fun onComplete() {
+                Log.d(TAG, "on Complete ")
+                binding?.progressBar?.visibility = View.GONE
+            }
+        })
     }
-    return super.onOptionsItemSelected(item);
-  }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == android.R.id.home) {
+            finish()
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
 }
