@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools">
+
+  <item
+    android:id="@+id/nav_see_blocked_contacts"
+    android:icon="@drawable/ic_person_blocked"
+    android:iconTint="@color/colorBlack"
+    android:orderInCategory="100"
+    android:title="@string/blocked_contacts"
+    android:visible="true"
+    app:showAsAction="ifRoom"
+    tools:ignore="UnusedAttribute" />
+
+  <item
+    android:id="@+id/nav_view_blocked_calls"
+    android:orderInCategory="200"
+    android:title="@string/blocked_calls"
+    app:showAsAction="never" />
+
+</menu>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools">
+
+  <data>
+
+    <variable
+      name="contact"
+      type="com.pratilipi.assignment.models.BlockedNumber" />
+
+    <variable
+      name="unBlockClick"
+      type="com.pratilipi.assignment.views.adapters.BlockedContactsAdapter" />
+
+    <import type="android.text.TextUtils" />
+
+    <import type="android.view.View" />
+
+  </data>
+
+  <androidx.constraintlayout.widget.ConstraintLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/dimen_16_dp">
+
+    <androidx.appcompat.widget.AppCompatTextView
+      android:id="@+id/tvName"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="@dimen/dimen_8_dp"
+      android:text="@{contact.name}"
+      android:layout_marginBottom="@dimen/dimen_8_dp"
+      android:textColor="@android:color/black"
+      android:textSize="@dimen/text_size_large"
+      android:visibility="@{TextUtils.isEmpty(contact.name) ? View.GONE : View.VISIBLE, default=gone}"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
+      tools:text="+911111111111" />
+
+
+    <androidx.appcompat.widget.AppCompatTextView
+      android:id="@+id/tvNumber"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="@dimen/dimen_8_dp"
+      android:text="@{contact.phoneNumber}"
+      android:textColor="@android:color/black"
+      android:textSize="@dimen/text_size_normal"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/tvName"
+      tools:text="+911111111111" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+      android:id="@+id/ivBlock"
+      android:layout_width="@dimen/dimen_48_dp"
+      android:layout_height="@dimen/dimen_48_dp"
+      android:background="?selectableItemBackgroundBorderless"
+      android:padding="@dimen/dimen_8_dp"
+      android:src="@drawable/ic_unblocked"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintRight_toRightOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
+      app:tint="@color/colorBlack" />
+
+  </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

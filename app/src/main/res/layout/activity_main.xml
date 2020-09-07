@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools">
+
+  <data>
+
+    <variable
+      name="vm"
+      type="com.pratilipi.assignment.viewModel.ContactsViewModel" />
+  </data>
+
+  <androidx.constraintlayout.widget.ConstraintLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".views.activities.MainActivity">
+
+    <androidx.recyclerview.widget.RecyclerView
+      android:id="@+id/rvContacts"
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      android:text="Hello World!"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintLeft_toLeftOf="parent"
+      app:layout_constraintRight_toRightOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/etPhoneNumber" />
+
+    <androidx.appcompat.widget.AppCompatEditText
+      android:id="@+id/etPhoneNumber"
+      android:layout_width="0dp"
+      android:layout_height="@dimen/dimen_48_dp"
+      android:hint="@string/enter_phone_number_to_block_or_search_in_contacts"
+      android:padding="@dimen/dimen_4_dp"
+      android:inputType="phone"
+      android:text="@={vm.phoneNumber}"
+      app:layout_constraintLeft_toLeftOf="parent"
+      app:layout_constraintRight_toLeftOf="@id/btn_block"
+      app:layout_constraintTop_toTopOf="parent"
+      tools:text="7073996181" />
+
+    <androidx.appcompat.widget.AppCompatButton
+      android:id="@+id/btn_block"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:background="?android:selectableItemBackground"
+      android:onClick="@{() -> vm.blockNumber()}"
+      android:text="@string/block"
+      app:layout_constraintLeft_toRightOf="@id/etPhoneNumber"
+      app:layout_constraintRight_toRightOf="parent"
+      app:layout_constraintTop_toTopOf="parent" />
+
+    <ProgressBar
+      android:id="@+id/progress_bar"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintLeft_toLeftOf="parent"
+      app:layout_constraintRight_toRightOf="parent"
+      app:layout_constraintTop_toTopOf="parent" />
+
+  </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
