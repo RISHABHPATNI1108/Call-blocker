@@ -9,6 +9,7 @@ import java.util.*
 
 @Entity(tableName = "blocked_calls")
 class BlockedCalls {
+
     @ColumnInfo(name = "time_stamp")
     @PrimaryKey
     @TypeConverters(Converter::class)

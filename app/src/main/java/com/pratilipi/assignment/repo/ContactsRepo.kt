@@ -7,8 +7,8 @@ import android.util.Patterns
 import com.pratilipi.assignment.models.ContactsModel
 import java.util.*
 
-class ContactsRepo(  // Check if cursor has some values and parse from the cursor till it has next value
-        private val context: Context) {
+class ContactsRepo(private val context: Context) {
+
     /**
      * Method to get List Of Contacts from Contacts content provider.
      *
@@ -31,14 +31,19 @@ class ContactsRepo(  // Check if cursor has some values and parse from the curso
                             ContactsContract.Contacts.DISPLAY_NAME))
                     val photoUri = cur.getString(cur.getColumnIndex(
                             ContactsContract.Contacts.PHOTO_THUMBNAIL_URI))
+
                     contact.displayName = name
                     contact.photoUri = photoUri
+
                     if (cur.getInt(cur.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER)) > 0) {
+
                         val pCur = cr.query(
                                 ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
                                 null,
                                 ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?", arrayOf(id), null)
+
                         if (pCur != null) {
+
                             val phoneNumber = ArrayList<String>()
                             while (pCur.moveToNext()) {
                                 val phoneNo = pCur.getString(pCur.getColumnIndex(
@@ -47,6 +52,7 @@ class ContactsRepo(  // Check if cursor has some values and parse from the curso
                                     phoneNumber.add(phoneNo)
                                 }
                             }
+
                             contact.phoneNumber = phoneNumber
                             contacts.add(contact)
                             pCur.close()
@@ -54,6 +60,7 @@ class ContactsRepo(  // Check if cursor has some values and parse from the curso
                     }
                 }
             }
+
             cur?.close()
             return contacts
         }

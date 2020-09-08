@@ -11,6 +11,7 @@ import com.pratilipi.assignment.models.BlockedNumber
 @Database(entities = [BlockedNumber::class, BlockedCalls::class], version = 1, exportSchema = false)
 @TypeConverters(Converter::class)
 abstract class BlockedNumberDatabase : RoomDatabase() {
+
     abstract fun blockedNumberDao(): BlockedNumberDao
     abstract fun blockedCallsDao(): BlockedCallsDao
 

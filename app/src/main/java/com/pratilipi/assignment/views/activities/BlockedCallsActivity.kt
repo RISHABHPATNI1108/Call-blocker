@@ -22,6 +22,7 @@ class BlockedCallsActivity : AppCompatActivity() {
 
     private var adapter: BlockedCallAdapter? = null
     private var binding: ActivityBlockedCallsAtivityBinding? = null
+    private var viewModel: ContactsViewModel? = null
 
     companion object {
         private val TAG = BlockedCallsActivity::class.java.name
@@ -32,19 +33,16 @@ class BlockedCallsActivity : AppCompatActivity() {
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_blocked_calls_ativity)
 
-        val viewModel = ViewModelProvider.AndroidViewModelFactory(application).create(ContactsViewModel::class.java)
+        viewModel = ViewModelProvider.AndroidViewModelFactory(application).create(ContactsViewModel::class.java)
 
-        adapter = BlockedCallAdapter()
-        binding?.rvContacts?.layoutManager = LinearLayoutManager(applicationContext)
-        binding?.rvContacts?.adapter = adapter
-        binding?.rvContacts?.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
-        if (supportActionBar != null) {
-            supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-        }
+        initialiseRecyclerView()
+        getDataFromViewModel()
+    }
 
-        Log.d(TAG, " in Block Call Activity$viewModel")
-        viewModel.blockedCall?.observeOn(Schedulers.io())?.subscribeOn(AndroidSchedulers.mainThread())?.subscribe(object : DisposableSubscriber<List<BlockedCalls?>?>() {
+    private fun getDataFromViewModel() {
+        viewModel?.blockedCall?.observeOn(Schedulers.io())?.subscribeOn(AndroidSchedulers.mainThread())?.subscribe(object : DisposableSubscriber<List<BlockedCalls?>?>() {
             override fun onNext(blockedNumbers: List<BlockedCalls?>?) {
                 Log.d(TAG, "blockNumberListReceived $blockedNumbers")
                 runOnUiThread {
@@ -63,6 +61,13 @@ class BlockedCallsActivity : AppCompatActivity() {
                 binding?.progressBar?.visibility = View.GONE
             }
         })
+    }
+
+    private fun initialiseRecyclerView() {
+        adapter = BlockedCallAdapter()
+        binding?.rvContacts?.layoutManager = LinearLayoutManager(applicationContext)
+        binding?.rvContacts?.adapter = adapter
+        binding?.rvContacts?.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

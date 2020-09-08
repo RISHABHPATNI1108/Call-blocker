@@ -2,13 +2,14 @@
   <string name="app_name">PratilipiAssignment</string>
   <string name="block">Block</string>
   <string name="invalid_phone_number">Invalid phone number</string>
-  <string name="no_phone_in_contact">No Pgone in contact</string>
+  <string name="no_phone_in_contact">No Phone number in contact</string>
   <string name="provide_contacts_permission">Kindly provide contacts permission for this application to work.</string>
   <string name="enter_phone_number_to_block_or_search_in_contacts">Enter Phone number to block</string>
   <string name="intro">Enter phone number in edit text to search contact and long press on any contact to block</string>
-  <string name="blocked_contacts">Blocked Contacts</string>
   <string name="blocked_calls">Blocked calls</string>
   <string name="insert_successfully">Contact added to block list.</string>
   <string name="needs_permission">Needs Permission</string>
   <string name="error_in_blocked_calls">Error in fetching blocked calls</string>
+  <string name="blocked_contacts">Blocked contacts</string>
+  <string name="contacts">Contacts</string>
 </resources>

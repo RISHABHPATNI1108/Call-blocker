@@ -7,6 +7,7 @@ import java.util.*
 
 @Entity(tableName = "blockednumbers")
 class BlockedNumber(phoneNumber: String, name: String?) {
+
     @ColumnInfo(name = "phone_number")
     @PrimaryKey
     var phoneNumber = ""

@@ -40,6 +40,7 @@ open class MainActivity : AppCompatActivity(), OnBlockContactListener, OnUnblock
     private var viewModel: ContactsViewModel? = null
     private var binding: ActivityMainBinding? = null
     private var contactsAdapter: ContactsAdapter? = null
+    private var handler: Handler? = null
     private var blockedContactsAdapter: BlockedContactsAdapter? = null
 
     companion object {
@@ -54,15 +55,17 @@ open class MainActivity : AppCompatActivity(), OnBlockContactListener, OnUnblock
         viewModel = ViewModelProvider.AndroidViewModelFactory(application).create(ContactsViewModel::class.java)
         binding?.vm = viewModel
 
-        contactsAdapter = ContactsAdapter(this)
-        binding?.rvContacts?.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
+        supportActionBar!!.title = getString(R.string.contacts)
 
-        blockedContactsAdapter = BlockedContactsAdapter(this)
-        binding?.rvContacts?.layoutManager = LinearLayoutManager(applicationContext)
-        binding?.rvContacts?.adapter = contactsAdapter
+        initialiseRecyclerView()
+        handler = Handler()
+        getDataFromViewModel()
+        addRecyclerViewFilter()
+        observeDataFromViewModel()
+    }
 
-        val handler = Handler()
-        handler.postDelayed({
+    private fun getDataFromViewModel() {
+        handler?.postDelayed({
             if (ActivityCompat.checkSelfPermission(this@MainActivity, Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
                 viewModel?.contacts
                 viewModel?.blockedNumbers?.subscribeOn(AndroidSchedulers.mainThread())?.observeOn(Schedulers.io())?.subscribe(object : DisposableSubscriber<List<BlockedNumber?>?>() {
@@ -83,27 +86,25 @@ open class MainActivity : AppCompatActivity(), OnBlockContactListener, OnUnblock
                 requestPermission()
             }
         }, 500)
+    }
 
+    /**
+     *  We add text change listener to Phone number text to filter contacts.
+     */
+    private fun addRecyclerViewFilter() {
         binding?.etPhoneNumber?.addTextChangedListener(object : TextWatcher {
+
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
+
             override fun afterTextChanged(s: Editable) {
                 contactsAdapter!!.filter.filter(s)
             }
         })
-
-        observeDataFromViewModel()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.activity_main_menu, menu)
-        if (menu!!.findItem(R.id.nav_view_blocked_calls) != null) {
-            if (binding!!.etPhoneNumber.visibility == View.VISIBLE) {
-                menu.findItem(R.id.nav_view_blocked_calls).setIcon(R.drawable.ic_person_blocked)
-            } else {
-                menu.findItem(R.id.nav_view_blocked_calls).setIcon(R.drawable.ic_unblocked)
-            }
-        }
         return super.onCreateOptionsMenu(menu)
     }
 
@@ -114,10 +115,12 @@ open class MainActivity : AppCompatActivity(), OnBlockContactListener, OnUnblock
                     binding!!.etPhoneNumber.visibility = View.GONE
                     binding!!.btnBlock.visibility = View.GONE
                     binding!!.rvContacts.adapter = blockedContactsAdapter
+                    supportActionBar!!.title = getString(R.string.blocked_contacts)
                 } else {
                     binding!!.etPhoneNumber.visibility = View.VISIBLE
                     binding!!.btnBlock.visibility = View.VISIBLE
                     binding!!.rvContacts.adapter = contactsAdapter
+                    supportActionBar!!.title = getString(R.string.contacts)
                 }
                 invalidateOptionsMenu()
                 return true
@@ -163,6 +166,15 @@ open class MainActivity : AppCompatActivity(), OnBlockContactListener, OnUnblock
         }
     }
 
+    private fun initialiseRecyclerView() {
+        contactsAdapter = ContactsAdapter(this)
+        blockedContactsAdapter = BlockedContactsAdapter(this)
+
+        binding?.rvContacts?.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
+        binding?.rvContacts?.layoutManager = LinearLayoutManager(applicationContext)
+        binding?.rvContacts?.adapter = contactsAdapter
+    }
+
     private fun observeDataFromViewModel() {
 
         viewModel!!.getMessageErrorData().observe(this, { s: String? ->
@@ -183,16 +195,12 @@ open class MainActivity : AppCompatActivity(), OnBlockContactListener, OnUnblock
 
     override fun onContactBlockClicked(contactsModel: ContactsModel?) {
         Log.d(TAG, "onContactBlockClicked $contactsModel")
-        if (contactsModel != null) {
-            viewModel!!.blockContact(contactsModel)
-        }
+        viewModel!!.blockContact(contactsModel!!)
     }
 
     override fun onContactUnblockClicked(phoneNumber: BlockedNumber?) {
-        if (phoneNumber != null) {
-            Log.d(TAG, "unblock $phoneNumber")
-            viewModel!!.unBlockContact(phoneNumber)
-        }
+        Log.d(TAG, "unblock $phoneNumber")
+        viewModel!!.unBlockContact(phoneNumber)
     }
 
 }

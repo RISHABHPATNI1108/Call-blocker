@@ -32,7 +32,9 @@ import java.util.*
 /**
  * BroadcastReceiver for catching calls
  */
+@Suppress("DEPRECATION")
 class CallBroadcastReceiver : BroadcastReceiver() {
+
     @SuppressLint("UnsafeProtectedBroadcastReceiver")
     override fun onReceive(context: Context, intent: Intent) {
 
@@ -68,7 +70,7 @@ class CallBroadcastReceiver : BroadcastReceiver() {
     /*
       We only check for the number who is calling, and remove country code from it,
       The reason is some contacts are saved without country code in contacts list.
-   */
+    */
     fun deleteCountry(phone: String): String {
         val phoneInstance = PhoneNumberUtil.getInstance()
         try {

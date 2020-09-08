@@ -17,6 +17,10 @@ import java.util.*
 
 class ContactsViewModel(application: Application) : AndroidViewModel(application), InsertAndDeleteListener {
 
+    companion object {
+        private val TAG = ContactsViewModel::class.java.name
+    }
+
     private val contactsRepo: ContactsRepo = ContactsRepo(application)
     private val repo: BlockedContactsAndCallsRepo = BlockedContactsAndCallsRepo(application, this)
 
@@ -32,7 +36,6 @@ class ContactsViewModel(application: Application) : AndroidViewModel(application
 
     fun blockNumber() {
         val phoneNumber = phoneNumber.value
-        Log.d(TAG, "")
         if (contactsRepo.isValidPhoneNumber(phoneNumber!!)) {
             repo.insertBlockNumber(phoneNumber)
         } else {
@@ -45,9 +48,8 @@ class ContactsViewModel(application: Application) : AndroidViewModel(application
     val blockedCall: Flowable<List<BlockedCalls?>?>?
         get() = repo.allBlockedCalls
 
-    fun blockContact(contactsModel: ContactsModel) {
-        Log.d(TAG, "blockContact" + contactsModel.phoneNumber?.size)
-        if (contactsModel.phoneNumber?.size != 0) {
+    fun blockContact(contactsModel: ContactsModel?) {
+        if (contactsModel?.phoneNumber?.size != 0) {
             repo.insertBlockNumber(contactsModel)
         } else {
             messageErrorData.postValue(getApplication<Application>().getString(R.string.no_phone_in_contact))
@@ -67,12 +69,9 @@ class ContactsViewModel(application: Application) : AndroidViewModel(application
     }
 
     override fun onDeletedSuccessfully() {}
+
     override fun onErrorInInsertOrDelete(error: String?) {
         messageErrorData.postValue(error)
-    }
-
-    companion object {
-        private val TAG = ContactsViewModel::class.java.name
     }
 
 }

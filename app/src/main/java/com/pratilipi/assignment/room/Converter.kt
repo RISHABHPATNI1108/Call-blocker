@@ -10,8 +10,7 @@ import java.util.*
 object Converter {
     private val TAG = Converter::class.java.name
 
-    // Set timezone value as GMT 존맛탱... to make time as reasonable
-    var df: DateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss'Z'", Locale.getDefault())
+    private var df: DateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss'Z'", Locale.getDefault())
     @JvmStatic
     @TypeConverter
     fun timeToDate(value: String?): Date? {

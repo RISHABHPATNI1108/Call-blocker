@@ -5,6 +5,7 @@ import com.pratilipi.assignment.models.BlockedNumber
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Maybe
+import java.util.ArrayList
 
 @Dao
 interface BlockedNumberDao {
@@ -13,6 +14,9 @@ interface BlockedNumberDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(number: BlockedNumber?): Completable
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertAll(number: ArrayList<BlockedNumber>?) : Completable
 
     @Delete
     fun delete(number: BlockedNumber?): Completable
