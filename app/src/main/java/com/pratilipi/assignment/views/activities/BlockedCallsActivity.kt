@@ -42,13 +42,11 @@ class BlockedCallsActivity : AppCompatActivity() {
     }
 
     private fun getDataFromViewModel() {
-        viewModel?.blockedCall?.observeOn(Schedulers.io())?.subscribeOn(AndroidSchedulers.mainThread())?.subscribe(object : DisposableSubscriber<List<BlockedCalls?>?>() {
+        viewModel?.blockedCall?.observeOn(AndroidSchedulers.mainThread())?.subscribeOn(Schedulers.io())?.subscribe(object : DisposableSubscriber<List<BlockedCalls?>?>() {
             override fun onNext(blockedNumbers: List<BlockedCalls?>?) {
                 Log.d(TAG, "blockNumberListReceived $blockedNumbers")
-                runOnUiThread {
-                    adapter!!.addAll(blockedNumbers)
-                    binding?.progressBar?.visibility = View.GONE
-                }
+                adapter!!.addAll(blockedNumbers)
+                binding?.progressBar?.visibility = View.GONE
             }
 
             override fun onError(t: Throwable) {

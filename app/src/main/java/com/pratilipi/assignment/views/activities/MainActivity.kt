@@ -68,10 +68,10 @@ open class MainActivity : AppCompatActivity(), OnBlockContactListener, OnUnblock
         handler?.postDelayed({
             if (ActivityCompat.checkSelfPermission(this@MainActivity, Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
                 viewModel?.contacts
-                viewModel?.blockedNumbers?.subscribeOn(AndroidSchedulers.mainThread())?.observeOn(Schedulers.io())?.subscribe(object : DisposableSubscriber<List<BlockedNumber?>?>() {
+                viewModel?.blockedNumbers?.observeOn(AndroidSchedulers.mainThread())?.subscribeOn(Schedulers.io())?.subscribe(object : DisposableSubscriber<List<BlockedNumber?>?>() {
                     override fun onNext(blockedNumbers: List<BlockedNumber?>?) {
                         Log.d(TAG, "blockNumberListReceived $blockedNumbers")
-                        runOnUiThread { blockedContactsAdapter!!.addAll(blockedNumbers) }
+                        blockedContactsAdapter!!.addAll(blockedNumbers)
                     }
 
                     override fun onError(t: Throwable) {
